@@ -147,8 +147,10 @@ class ScatterPlot extends React.Component {
     const xMin = d3.min(this.props.data, (d) => d.general.winPercent);
     const xMax = d3.max(this.props.data, (d) => d.general.winPercent);
 
+    const domainDifference = (xMax - xMin) * 0.05;
+
     return d3.scaleTime()
-      .domain([xMin * 0.95, xMax * 1.05])
+      .domain([xMin - domainDifference, xMax + domainDifference])
       .range([this.props.padding, (this.props.width - this.props.padding / 2)]);
   }
 
@@ -156,8 +158,10 @@ class ScatterPlot extends React.Component {
     const yMin = d3.min(this.props.data, (d) => d.general.playPercent);
     const yMax = d3.max(this.props.data, (d) => d.general.playPercent);
 
+    const domainDifference = (yMax - yMin) * 0.05;
+
     return d3.scaleLinear()
-      .domain([yMin * 0.95, yMax * 1.05])
+      .domain([yMin - domainDifference, yMax + domainDifference])
       .range([this.props.height - this.props.padding, this.props.padding]);
   }
 
