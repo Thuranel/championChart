@@ -5,117 +5,175 @@
  */
 
 import React from 'react';
-import Helmet from 'react-helmet';
-import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
+import * as d3 from 'd3';
+import { champData } from './data';
 
-import { makeSelectRepos, makeSelectLoading, makeSelectError } from 'containers/App/selectors';
-import H2 from 'components/H2';
-import ReposList from 'components/ReposList';
-import AtPrefix from './AtPrefix';
-import CenteredSection from './CenteredSection';
-import Form from './Form';
-import Input from './Input';
-import Section from './Section';
-import messages from './messages';
-import { loadRepos } from '../App/actions';
-import { changeUsername } from './actions';
-import { makeSelectUsername } from './selectors';
+export class HomePage extends React.PureComponent {
 
-export class HomePage extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
-  /**
-   * when initial state username is not null, submit the form to load repos
-   */
-  componentDidMount() {
-    if (this.props.username && this.props.username.trim().length > 0) {
-      this.props.onSubmitForm();
-    }
+  constructor(props) {
+    super(props);
+    this.state = {
+      width: 768,
+      height: 400,
+      padding: 50
+    };
   }
 
   render() {
-    const { loading, error, repos } = this.props;
-    const reposListProps = {
-      loading,
-      error,
-      repos,
-    };
-
     return (
       <article>
-        <Helmet
-          title="Home Page"
-          meta={[
-            { name: 'description', content: 'A React.js Boilerplate application homepage' },
-          ]}
-        />
-        <div>
-          <CenteredSection>
-            <H2>
-              <FormattedMessage {...messages.startProjectHeader} />
-            </H2>
-            <p>
-              <FormattedMessage {...messages.startProjectMessage} />
-            </p>
-          </CenteredSection>
-          <Section>
-            <H2>
-              <FormattedMessage {...messages.trymeHeader} />
-            </H2>
-            <Form onSubmit={this.props.onSubmitForm}>
-              <label htmlFor="username">
-                <FormattedMessage {...messages.trymeMessage} />
-                <AtPrefix>
-                  <FormattedMessage {...messages.trymeAtPrefix} />
-                </AtPrefix>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="mxstbr"
-                  value={this.props.username}
-                  onChange={this.props.onChangeUsername}
-                />
-              </label>
-            </Form>
-            <ReposList {...reposListProps} />
-          </Section>
-        </div>
+        {
+          this.state.data !== [] &&
+          <ScatterPlot data={champData} {...this.state} />
+        }
       </article>
     );
   }
 }
 
 HomePage.propTypes = {
-  loading: React.PropTypes.bool,
-  error: React.PropTypes.oneOfType([
-    React.PropTypes.object,
-    React.PropTypes.bool,
-  ]),
-  repos: React.PropTypes.oneOfType([
-    React.PropTypes.array,
-    React.PropTypes.bool,
-  ]),
-  onSubmitForm: React.PropTypes.func,
-  username: React.PropTypes.string,
-  onChangeUsername: React.PropTypes.func,
+
 };
 
-export function mapDispatchToProps(dispatch) {
+export function mapDispatchToProps() {
   return {
-    onChangeUsername: (evt) => dispatch(changeUsername(evt.target.value)),
-    onSubmitForm: (evt) => {
-      if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-      dispatch(loadRepos());
-    },
+
   };
 }
 
 const mapStateToProps = createStructuredSelector({
-  repos: makeSelectRepos(),
-  username: makeSelectUsername(),
-  loading: makeSelectLoading(),
-  error: makeSelectError(),
+
 });
 
 // Wrap the component to inject dispatch and state into it
 export default connect(mapStateToProps, mapDispatchToProps)(HomePage);
+
+
+
+
+
+
+
+class Axis extends React.Component {
+
+  constructor(props) {
+    super(props);
+  }
+
+  componentDidMount() {
+    this.renderAxis();
+  }
+
+  componentDidUpdate() {
+    this.renderAxis();
+  }
+
+  renderAxis() {
+    const axisContainer = this.refs.axisContainer;
+
+    if (this.props.orient === 'bottom') {
+      const axis = d3.select('#' + this.props.id + " .axis")
+        .attr('class', 'axis xaxis')
+        .call(d3.axisBottom()
+          .ticks(Math.round(this.props.width / 60))
+          .scale(this.props.scale))
+        .selectAll('text')
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em");
+    }
+    else {
+      const yMax = d3.max(this.props.data, (d) => d.general.playPercent);
+
+      const axis = d3.axisLeft()
+        .ticks(yMax)
+        .scale(this.props.scale);
+
+      d3.select(axisContainer).call(axis);
+    }
+  }
+
+  render() {
+    return (
+      <g id={this.props.id}>
+        <g className="axis" ref="axisContainer" transform={this.props.translate}/>
+        <g className="grid" ref="gridContainer" transform={this.props.translate}/>
+      </g>
+    )
+  }
+}
+
+class XYAxis extends React.Component {
+  render() {
+    return (
+      <g className="xy-axis">
+        <Axis translate={`translate(0, ${this.props.height - this.props.padding})`}
+              scale={this.props.xScale} id="xaxis"
+              orient="bottom" {...this.props}
+        />
+        <Axis translate={`translate(${this.props.padding}, 0)`}
+              scale={this.props.yScale} id="yaxis"
+              orient="left" {...this.props}
+        />
+      </g>
+    );
+  }
+}
+
+class DataCircles extends React.Component {
+
+  renderCircle(coords) {
+    return (
+      <circle
+        cx={this.props.xScale(coords.general.winPercent)}
+        cy={this.props.yScale(coords.general.playPercent)}
+        fill={coords.role}
+        r={10}
+        key={coords._id.$oid}
+      />
+    );
+  }
+
+  render() {
+    return <g>{this.props.data.map(this.renderCircle.bind(this))}</g>;
+  }
+}
+
+class ScatterPlot extends React.Component {
+  getXScale() {
+    // set the domain min and max to original data, so it doesn't scale down when filtering out some data
+    const xMin = d3.min(this.props.data, (d) => d.general.winPercent);
+    const xMax = d3.max(this.props.data, (d) => d.general.winPercent);
+
+    return d3.scaleTime()
+      .domain([xMin * 0.95, xMax * 1.05])
+      .range([this.props.padding, (this.props.width - this.props.padding / 2)]);
+  }
+
+  getYScale() {
+    const yMin = d3.min(this.props.data, (d) => d.general.playPercent);
+    const yMax = d3.max(this.props.data, (d) => d.general.playPercent);
+
+    return d3.scaleLinear()
+      .domain([yMin * 0.95, yMax * 1.05])
+      .range([this.props.height - this.props.padding, this.props.padding]);
+  }
+
+  render() {
+    const xScale = this.getXScale();
+    const yScale = this.getYScale();
+
+    return (
+      <svg width={this.props.width} height={this.props.height}>
+        <XYAxis xScale={xScale} yScale={yScale} {...this.props} />
+        <DataCircles xScale={xScale} yScale={yScale} {...this.props} />
+      </svg>
+    );
+  }
+}
+
+ScatterPlot.PropTypes = {
+  data: React.PropTypes.isArray
+};
