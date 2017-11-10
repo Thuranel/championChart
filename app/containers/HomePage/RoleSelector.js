@@ -12,7 +12,14 @@ class RoleSelector extends React.Component { // eslint-disable-line react/prefer
       Jungle: true,
       Middle: true,
       ADC: true,
-      Support: true
+      Support: true,
+      style: {
+        Top: $("<style type='text/css'>").appendTo('head'),
+        Jungle: $("<style type='text/css'>").appendTo('head'),
+        Middle: $("<style type='text/css'>").appendTo('head'),
+        ADC: $("<style type='text/css'>").appendTo('head'),
+        Support: $("<style type='text/css'>").appendTo('head'),
+      }
     };
   }
 
@@ -24,12 +31,14 @@ class RoleSelector extends React.Component { // eslint-disable-line react/prefer
   }
 
   filterRole(role) {
-    if (this.state[role]) {
-      $('.' + role).hide();
-    }
-    else {
-      $('.' + role).show();
-    }
+    // The role filter use a really dumb idea
+    // We create a stylesheet in the head of our document with a rule that says if the element is hidden or visible
+    // We do that because we want to set the rule directly in our CSS and not on our inline element
+    // Because our data circles are reappended every time there is a zoom
+    // Otherwise we would need to make a function call every time our circle would get reappended
+    // Still this solution is dumb. I'm sorry dear god of programming.
+    const css = "." + role + " { visibility: " + (this.state[role] ? 'hidden' : 'visible') + "}";
+    this.state.style[role].html(css);
 
     this.setState({
       [role]: !this.state[role]

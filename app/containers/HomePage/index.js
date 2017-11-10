@@ -268,9 +268,9 @@ class ScatterPlot extends React.Component {
     d3.select('svg').call(tip);
 
     const zoom = d3.zoom()
-      .extent([[50, 50], [this.props.width - (100), this.props.height + 75]])
+      .extent([[50, 50], [this.props.width - (100), this.props.height - 50]])
       .scaleExtent([1, 10])
-      .translateExtent([[50, 50], [this.props.width - (100), this.props.height + 75]])
+      .translateExtent([[50, 50], [this.props.width - (100), this.props.height - 50]])
       .on("zoom", this.zoomed);
 
     d3.select('svg').call(zoom);
@@ -335,6 +335,8 @@ class ScatterPlot extends React.Component {
   }
 
   zoomed() {
+    tip.hide();
+
     const transform = d3.event.transform;
 
     // Zoom the circles
