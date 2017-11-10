@@ -13,6 +13,7 @@ import d3Tip from 'd3-tip';
 import { champData } from './data';
 import RoleSelector from './RoleSelector';
 
+
 const color = d3.scaleOrdinal(d3.schemeCategory10);
 
 function importAll(r) {
@@ -34,15 +35,22 @@ const tip = d3Tip().attr('class', 'd3-tip')
       "<strong>Play %:</strong> <span>" + d.general.playPercent + "</span> ";
   });
 
+
 export class HomePage extends React.PureComponent {
 
   constructor(props) {
     super(props);
+
+    const categories = [{ label: 'Win (%)', value: 'winPercent' }, { label: 'Play (%)', value: 'playPercent' }, { label: 'Ban rate (%)', value: 'banRate' }];
+
     this.state = {
       width: 900,
       height: 600,
       padding: 50,
-      avatarSize: 0
+      avatarSize: 0,
+      categories,
+      optionX: categories[0],
+      optionY: categories[1]
     };
     this.updateDimensions = this.updateDimensions.bind(this);
   }
@@ -93,7 +101,29 @@ export class HomePage extends React.PureComponent {
     });
   }
 
+  updateX(e) {
+    this.setState({
+      optionX: {
+        label: e.target.options[e.target.selectedIndex].text,
+        value: e.target.value
+      }
+    });
+  }
+
+  updateY(e) {
+    this.setState({
+      optionY: {
+        label: e.target.options[e.target.selectedIndex].text,
+        value: e.target.value
+      }
+    });
+  }
+
   render() {
+    const options = this.state.categories.map((elem) => {
+      return <option value={elem.value} key={elem.value} name={elem.label}> {elem.label} </option>;
+    });
+
     return (
       <article>
         {
@@ -101,6 +131,12 @@ export class HomePage extends React.PureComponent {
             <div id="chart" style={{ maxWidth: 990, margin: "auto" }}>
               <ScatterPlot data={champData} {...this.state} />
               <RoleSelector />
+              <select value={this.state.optionX.value} onChange={(e) => this.updateX(e)}>
+                {options}
+              </select>
+              <select value={this.state.optionY.value} onChange={(e) => this.updateY(e)}>
+                {options}
+              </select>
             </div>
         }
       </article>
@@ -132,7 +168,7 @@ class YAxis extends React.Component {
 
   renderAxis() {
     const axisContainer = this.refs.axisContainer;
-    const yMax = d3.max(this.props.data, (d) => d.general.playPercent);
+    const yMax = d3.max(this.props.data, (d) => d.general[this.props.optionY.value]);
 
     const axis = d3.axisLeft()
       .ticks(yMax / 2)
@@ -173,8 +209,8 @@ class XAxis extends React.Component {
 
   renderAxis() {
     const axisContainer = this.refs.axisContainer;
-    const xMin = d3.min(this.props.data, (d) => d.general.winPercent);
-    const xMax = d3.max(this.props.data, (d) => d.general.winPercent);
+    const xMin = d3.min(this.props.data, (d) => d.general[this.props.optionX.value]);
+    const xMax = d3.max(this.props.data, (d) => d.general[this.props.optionX.value]);
 
     const axis = d3.axisBottom()
       .ticks(xMax - xMin)
@@ -218,10 +254,10 @@ class DataCircles extends React.Component {
       .data(this.props.data)
       .enter().append('circle')
       .attr('cx', ((d) => {
-        return this.props.xScale(d.general.winPercent);
+        return this.props.xScale(d.general[this.props.optionX.value]);
       }))
       .attr('cy', ((d) => {
-        return this.props.yScale(d.general.playPercent);
+        return this.props.yScale(d.general[this.props.optionY.value]);
       }))
       .attr('r', this.props.avatarSize / 2)
       .style('stroke', ((d) => {
@@ -258,8 +294,8 @@ class ScatterPlot extends React.Component {
 
   componentWillMount() {
     this.setState({
-      xScale: this.getXScale(this.props.width),
-      yScale: this.getYScale(this.props.height)
+      xScale: this.getXScale(this.props.width, this.props.optionX),
+      yScale: this.getYScale(this.props.height, this.props.optionY)
     });
   }
 
@@ -268,10 +304,11 @@ class ScatterPlot extends React.Component {
     d3.select('svg').call(tip);
 
     const zoom = d3.zoom()
-      .extent([[50, 50], [this.props.width - (100), this.props.height - 50]])
+      .extent([[this.props.padding, this.props.padding], [this.props.width - (this.props.padding * 2), this.props.height - this.props.padding]])
       .scaleExtent([1, 10])
-      .translateExtent([[50, 50], [this.props.width - (100), this.props.height - 50]])
+      .translateExtent([[this.props.padding, this.props.padding], [this.props.width - (this.props.padding), this.props.height - this.props.padding]])
       .on("zoom", this.zoomed);
+
 
     d3.select('svg').call(zoom);
   }
@@ -283,31 +320,30 @@ class ScatterPlot extends React.Component {
         .attr('height', nextProps.avatarSize)
         .attr('width', nextProps.avatarSize);
     }
-    if (nextProps.width !== this.props.width) {
-      this.setState({
-        xScale: this.getXScale(nextProps.width),
-        yScale: this.getYScale(nextProps.height)
-      });
-    }
+
+    this.setState({
+      xScale: this.getXScale(nextProps.width, nextProps.optionX),
+      yScale: this.getYScale(nextProps.height, nextProps.optionY)
+    });
   }
 
-  getXScale(width) {
+  getXScale(width, optionX) {
     // set the domain min and max to original data, so it doesn't scale down when filtering out some data
-    const xMin = d3.min(this.props.data, (d) => d.general.winPercent);
-    const xMax = d3.max(this.props.data, (d) => d.general.winPercent);
+    const xMin = d3.min(this.props.data, (d) => d.general[optionX.value]);
+    const xMax = d3.max(this.props.data, (d) => d.general[optionX.value]);
 
-    const domainDifference = (xMax - xMin) * 0.1;
+    const domainDifference = (xMax - xMin) * 0.075;
 
     return d3.scaleLinear()
       .domain([xMin - domainDifference, xMax + domainDifference])
       .range([this.props.padding, (width - (this.props.padding / 2))]);
   }
 
-  getYScale(height) {
-    const yMin = d3.min(this.props.data, (d) => d.general.playPercent);
-    const yMax = d3.max(this.props.data, (d) => d.general.playPercent);
+  getYScale(height, optionY) {
+    const yMin = d3.min(this.props.data, (d) => d.general[optionY.value]);
+    const yMax = d3.max(this.props.data, (d) => d.general[optionY.value]);
 
-    const domainDifference = (yMax - yMin) * 0.1;
+    const domainDifference = (yMax - yMin) * 0.075;
 
     return d3.scaleLinear()
       .domain([yMin - domainDifference, yMax + domainDifference])
@@ -340,8 +376,8 @@ class ScatterPlot extends React.Component {
     const transform = d3.event.transform;
 
     // Zoom the circles
-    const xNewScale = transform.rescaleX(this.getXScale(this.props.width));
-    const yNewScale = transform.rescaleY(this.getYScale(this.props.height));
+    const xNewScale = transform.rescaleX(this.getXScale(this.props.width, this.props.optionX));
+    const yNewScale = transform.rescaleY(this.getYScale(this.props.height, this.props.optionY));
 
     this.setState({
       xScale: xNewScale,
@@ -367,8 +403,8 @@ class ScatterPlot extends React.Component {
               </rect>
             </clipPath>
           </defs>
-          <text transform={"translate(" + (this.props.width - 10) + " , " + (this.props.height - 10) + ")"} style={{ textAnchor: "end" }}> Win (%)</text>
-          <text transform={"rotate(-90)"} dy="1em" x={-this.props.padding} style={{ textAnchor: "end" }}> Play (%)</text>
+          <text transform={"translate(" + (this.props.width - 10) + " , " + (this.props.height - 10) + ")"} style={{ textAnchor: "end" }}> {this.props.optionX.label} </text>
+          <text transform={"rotate(-90)"} dy="1em" x={-this.props.padding} style={{ textAnchor: "end" }}> {this.props.optionY.label} </text>
           <DataCircles xScale={this.state.xScale} yScale={this.state.yScale} {...this.props} />
         </svg>
       </div>
