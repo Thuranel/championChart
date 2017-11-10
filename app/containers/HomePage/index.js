@@ -24,17 +24,6 @@ function importAll(r) {
 
 const images = importAll(require.context('../../images', false, /\.(png|jpe?g|svg)$/));
 
-const tip = d3Tip().attr('class', 'd3-tip')
-  .attr('id', 'tip')
-  .offset([-10, 0])
-  .html((d) => {
-    return "<strong> " + d.title + " " + d.role + " </strong>" +
-      "<br>" +
-      "<strong>Win %:</strong> <span>" + d.general.winPercent + "</span> " +
-      "<br>" +
-      "<strong>Play %:</strong> <span>" + d.general.playPercent + "</span> ";
-  });
-
 
 export class HomePage extends React.PureComponent {
 
@@ -270,8 +259,8 @@ class DataCircles extends React.Component {
       .attr('class', ((d) => {
         return d.role;
       }))
-      .on('mousemove', tip.show)
-      .on('mouseout', tip.hide);
+      .on('mousemove', this.props.tip.show)
+      .on('mouseout', this.props.tip.hide);
   }
 
   render() {
@@ -286,10 +275,12 @@ class ScatterPlot extends React.Component {
 
     this.state = {
       xScale: null,
-      yScale: null
+      yScale: null,
+      tip: this.tip()
     };
 
     this.zoomed = this.zoomed.bind(this);
+    this.tip = this.tip.bind(this);
   }
 
   componentWillMount() {
@@ -301,14 +292,13 @@ class ScatterPlot extends React.Component {
 
   componentDidMount() {
     this.loadImagePatterns();
-    d3.select('svg').call(tip);
+    d3.select('svg').call(this.state.tip);
 
     const zoom = d3.zoom()
       .extent([[this.props.padding, this.props.padding], [this.props.width - (this.props.padding * 2), this.props.height - this.props.padding]])
       .scaleExtent([1, 10])
-      .translateExtent([[this.props.padding, this.props.padding], [this.props.width - (this.props.padding), this.props.height - this.props.padding]])
+      .translateExtent([[this.props.padding, this.props.padding], [this.props.width - (this.props.padding * 2), this.props.height - this.props.padding]])
       .on("zoom", this.zoomed);
-
 
     d3.select('svg').call(zoom);
   }
@@ -371,7 +361,7 @@ class ScatterPlot extends React.Component {
   }
 
   zoomed() {
-    tip.hide();
+    this.state.tip.hide();
 
     const transform = d3.event.transform;
 
@@ -383,6 +373,19 @@ class ScatterPlot extends React.Component {
       xScale: xNewScale,
       yScale: yNewScale
     });
+  }
+
+  tip() {
+    return d3Tip().attr('class', 'd3-tip')
+      .attr('id', 'tip')
+      .offset([-10, 0])
+      .html((d) => {
+        return "<strong> " + d.title + " " + d.role + " </strong>" +
+          "<br>" +
+          "<strong>" + this.props.optionX.label + ":</strong> <span>" + d.general[this.props.optionX.value] + "</span> " +
+          "<br>" +
+          "<strong>" + this.props.optionY.label + ":</strong> <span>" + d.general[this.props.optionY.value] + "</span> ";
+      });
   }
 
   render() {
@@ -405,7 +408,7 @@ class ScatterPlot extends React.Component {
           </defs>
           <text transform={"translate(" + (this.props.width - 10) + " , " + (this.props.height - 10) + ")"} style={{ textAnchor: "end" }}> {this.props.optionX.label} </text>
           <text transform={"rotate(-90)"} dy="1em" x={-this.props.padding} style={{ textAnchor: "end" }}> {this.props.optionY.label} </text>
-          <DataCircles xScale={this.state.xScale} yScale={this.state.yScale} {...this.props} />
+          <DataCircles xScale={this.state.xScale} yScale={this.state.yScale} tip={this.state.tip} {...this.props} />
         </svg>
       </div>
     );
