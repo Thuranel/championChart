@@ -47,7 +47,7 @@ class RoleSelector extends React.Component { // eslint-disable-line react/prefer
 
   render() {
     return (
-      <div id="roleCheck" style={{ width: 90, float: "left", marginTop: 50 }}>
+      <div id="roleCheck" style={{ width: 90, float: "left", marginTop: 30 }}>
         <div className="roleBox">
           <label htmlFor="topCheckbox">
             <input type="checkbox" checked={this.state.Top} id="topCheckbox" value="Top" onChange={() => this.filterRole('Top')} /> Top

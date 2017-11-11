@@ -35,7 +35,7 @@ export class HomePage extends React.PureComponent {
     this.state = {
       width: 900,
       height: 600,
-      padding: 50,
+      padding: 30,
       avatarSize: 0,
       categories,
       optionX: categories[0],
@@ -117,15 +117,17 @@ export class HomePage extends React.PureComponent {
       <article>
         {
           this.state.data !== [] &&
-            <div id="chart" style={{ maxWidth: 990, margin: "auto" }}>
-              <ScatterPlot data={champData} {...this.state} />
+            <div id="chart" style={{ maxWidth: 1130, paddingRight: 20, margin: "auto" }}>
+              <div style={{ float: 'left', maxWidth: 1020 }}>
+                <select value={this.state.optionY.value} onChange={(e) => this.updateY(e)} style={{ float: 'left', marginTop: this.state.padding }}>
+                  {options}
+                </select>
+                <ScatterPlot data={champData} {...this.state} />
+                <select value={this.state.optionX.value} onChange={(e) => this.updateX(e)} style={{ float: 'right' }}>
+                  {options}
+                </select>
+              </div>
               <RoleSelector />
-              <select value={this.state.optionX.value} onChange={(e) => this.updateX(e)}>
-                {options}
-              </select>
-              <select value={this.state.optionY.value} onChange={(e) => this.updateY(e)}>
-                {options}
-              </select>
             </div>
         }
       </article>
@@ -400,24 +402,20 @@ class ScatterPlot extends React.Component {
     const clipHeight = this.props.height - (this.props.padding * 2);
 
     return (
-      <div style={{ float: "left" }}>
-        <svg width={this.props.width} height={this.props.height} viewBox={"0 0 " + this.props.width + " " + this.props.height}>
-          <g className="xy-axis">
-            <XAxis scale={this.state.xScale} id="xaxis" {...this.props} />
-            <YAxis scale={this.state.yScale} id="yaxis" {...this.props} />
-          </g>
-          <rect fill="none" pointerEvents={"all"} x={this.props.padding} y={this.props.padding} width={clipWidth} height={clipHeight}> </rect>
-          <defs>
-            <clipPath id="clip">
-              <rect id="clip-rect" x={this.props.padding} y={this.props.padding} width={clipWidth} height={clipHeight}>
-              </rect>
-            </clipPath>
-          </defs>
-          <text transform={"translate(" + (this.props.width - 10) + " , " + (this.props.height - 10) + ")"} style={{ textAnchor: "end" }}> {this.props.optionX.label} </text>
-          <text transform={"rotate(-90)"} dy="1em" x={-this.props.padding} style={{ textAnchor: "end" }}> {this.props.optionY.label} </text>
-          <DataCircles xScale={this.state.xScale} yScale={this.state.yScale} tip={this.state.tip} {...this.props} />
-        </svg>
-      </div>
+      <svg width={this.props.width} height={this.props.height} viewBox={"0 0 " + this.props.width + " " + this.props.height}>
+        <g className="xy-axis">
+          <XAxis scale={this.state.xScale} id="xaxis" {...this.props} />
+          <YAxis scale={this.state.yScale} id="yaxis" {...this.props} />
+        </g>
+        <rect fill="none" pointerEvents={"all"} x={this.props.padding} y={this.props.padding} width={clipWidth} height={clipHeight}> </rect>
+        <defs>
+          <clipPath id="clip">
+            <rect id="clip-rect" x={this.props.padding} y={this.props.padding} width={clipWidth} height={clipHeight}>
+            </rect>
+          </clipPath>
+        </defs>
+        <DataCircles xScale={this.state.xScale} yScale={this.state.yScale} tip={this.state.tip} {...this.props} />
+      </svg>
     );
   }
 }
