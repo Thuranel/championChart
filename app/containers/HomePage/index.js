@@ -276,7 +276,8 @@ class ScatterPlot extends React.Component {
     this.state = {
       xScale: null,
       yScale: null,
-      tip: this.tip()
+      tip: this.tip(),
+      zoom: null
     };
 
     this.zoomed = this.zoomed.bind(this);
@@ -286,21 +287,15 @@ class ScatterPlot extends React.Component {
   componentWillMount() {
     this.setState({
       xScale: this.getXScale(this.props.width, this.props.optionX),
-      yScale: this.getYScale(this.props.height, this.props.optionY)
+      yScale: this.getYScale(this.props.height, this.props.optionY),
+      zoom: this.zoom()
     });
   }
 
   componentDidMount() {
     this.loadImagePatterns();
     d3.select('svg').call(this.state.tip);
-
-    const zoom = d3.zoom()
-      .extent([[this.props.padding, this.props.padding], [this.props.width - (this.props.padding * 2), this.props.height - this.props.padding]])
-      .scaleExtent([1, 10])
-      .translateExtent([[this.props.padding, this.props.padding], [this.props.width - (this.props.padding * 2), this.props.height - this.props.padding]])
-      .on("zoom", this.zoomed);
-
-    d3.select('svg').call(zoom);
+    d3.select('svg').call(this.state.zoom);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -309,6 +304,10 @@ class ScatterPlot extends React.Component {
       d3.selectAll('pattern image')
         .attr('height', nextProps.avatarSize)
         .attr('width', nextProps.avatarSize);
+    }
+
+    if (nextProps.optionX !== this.props.optionX || nextProps.optionY !== this.props.optionY) {
+      this.state.zoom.transform(d3.select('svg'), d3.zoomIdentity);
     }
 
     this.setState({
@@ -386,6 +385,14 @@ class ScatterPlot extends React.Component {
           "<br>" +
           "<strong>" + this.props.optionY.label + ":</strong> <span>" + d.general[this.props.optionY.value] + "</span> ";
       });
+  }
+
+  zoom() {
+    return d3.zoom()
+      .extent([[this.props.padding, this.props.padding], [this.props.width - (this.props.padding * 2), this.props.height - this.props.padding]])
+      .scaleExtent([1, 10])
+      .translateExtent([[this.props.padding, this.props.padding], [this.props.width - (this.props.padding * 2), this.props.height - this.props.padding]])
+      .on("zoom", this.zoomed);
   }
 
   render() {
