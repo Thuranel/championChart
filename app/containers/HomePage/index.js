@@ -118,7 +118,7 @@ export class HomePage extends React.PureComponent {
       <article>
         {
           this.state.data !== [] &&
-            <div>
+            <div style={{ padding: "0px 8px" }}>
               <div id="chart" style={{ maxWidth: 1130, paddingRight: 20, margin: "auto" }}>
                 <div style={{ float: 'left', maxWidth: 1020 }}>
                   <select className="styled-select blue semi-square" value={this.state.optionY.value} onChange={(e) => this.updateY(e)} style={{ float: 'left', marginTop: this.state.padding }}>

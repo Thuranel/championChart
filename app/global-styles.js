@@ -94,5 +94,15 @@ injectGlobal`
     background-color: #f0f0f0;
     border-bottom: 1px solid #e0e0e0;
   }
+  
+  .faqParagraph {
+    width: 50%;
+  }
+  
+  @media(max-width: 768px) {
+    .faqParagraph {
+      width: 100%;
+    }
+  }
  
 `;
