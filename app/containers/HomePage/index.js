@@ -24,13 +24,27 @@ function importAll(r) {
 
 const images = importAll(require.context('../../images', false, /\.(png|jpe?g|svg)$/));
 
+const roleMap = {
+  TOP: { name: "Top", index: 0 },
+  JUNGLE: { name: "Jungle", index: 1 },
+  MIDDLE: { name: "Middle", index: 2 },
+  DUO_CARRY: { name: "ADC", index: 3 },
+  DUO_SUPPORT: { name: "Support", index: 4 }
+};
+
 
 export class HomePage extends React.PureComponent {
 
   constructor(props) {
     super(props);
 
-    const categories = [{ label: 'Win (%)', value: 'winPercent' }, { label: 'Play (%)', value: 'playPercent' }, { label: 'Ban rate (%)', value: 'banRate' }];
+    const categories = [
+      { label: 'Win (%)', value: 'winRate' },
+      { label: 'Play (%)', value: 'playRate' },
+      { label: 'Ban rate (%)', value: 'banRate' },
+      { label: 'Win % at 20', value: 'winRateAt20' },
+      { label: 'Win % at 40+', value: 'winRateAt40plus' }
+    ];
 
     this.state = {
       width: 900,
@@ -162,7 +176,7 @@ class YAxis extends React.Component {
 
   renderAxis() {
     const axisContainer = this.refs.axisContainer;
-    const yMax = d3.max(this.props.data, (d) => d.general[this.props.optionY.value]);
+    const yMax = d3.max(this.props.data, (d) => d[this.props.optionY.value]);
 
     const axis = d3.axisLeft()
       .ticks(yMax / 2)
@@ -203,8 +217,8 @@ class XAxis extends React.Component {
 
   renderAxis() {
     const axisContainer = this.refs.axisContainer;
-    const xMin = d3.min(this.props.data, (d) => d.general[this.props.optionX.value]);
-    const xMax = d3.max(this.props.data, (d) => d.general[this.props.optionX.value]);
+    const xMin = d3.min(this.props.data, (d) => d[this.props.optionX.value]);
+    const xMax = d3.max(this.props.data, (d) => d[this.props.optionX.value]);
 
     const axis = d3.axisBottom()
       .ticks(xMax - xMin)
@@ -248,21 +262,21 @@ class DataCircles extends React.Component {
       .data(this.props.data)
       .enter().append('circle')
       .attr('cx', ((d) => {
-        return this.props.xScale(d.general[this.props.optionX.value]);
+        return this.props.xScale(parseFloat(d[this.props.optionX.value]));
       }))
       .attr('cy', ((d) => {
-        return this.props.yScale(d.general[this.props.optionY.value]);
+        return this.props.yScale(parseFloat(d[this.props.optionY.value]));
       }))
       .attr('r', this.props.avatarSize / 2)
       .style('stroke', ((d) => {
-        return color(d.role);
+        return color(roleMap[d.role].index);
       }))
       .style('stroke-width', 2.5)
       .style('fill', ((d) => {
         return "url(#champ_avatar_" + d.key + d.role + ")";
       }))
       .attr('class', ((d) => {
-        return d.role;
+        return roleMap[d.role].name;
       }))
       .on('mousemove', this.props.tip.show)
       .on('mouseout', this.props.tip.hide);
@@ -323,8 +337,8 @@ class ScatterPlot extends React.Component {
 
   getXScale(width, optionX) {
     // set the domain min and max to original data, so it doesn't scale down when filtering out some data
-    const xMin = d3.min(this.props.data, (d) => d.general[optionX.value]);
-    const xMax = d3.max(this.props.data, (d) => d.general[optionX.value]);
+    const xMin = d3.min(this.props.data, (d) => parseFloat(d[optionX.value]));
+    const xMax = d3.max(this.props.data, (d) => parseFloat(d[optionX.value]));
 
     const domainDifference = (xMax - xMin) * 0.075;
 
@@ -334,8 +348,8 @@ class ScatterPlot extends React.Component {
   }
 
   getYScale(height, optionY) {
-    const yMin = d3.min(this.props.data, (d) => d.general[optionY.value]);
-    const yMax = d3.max(this.props.data, (d) => d.general[optionY.value]);
+    const yMin = d3.min(this.props.data, (d) => parseFloat(d[optionY.value]));
+    const yMax = d3.max(this.props.data, (d) => parseFloat(d[optionY.value]));
 
     const domainDifference = (yMax - yMin) * 0.075;
 
@@ -384,19 +398,19 @@ class ScatterPlot extends React.Component {
       .attr('id', 'tip')
       .offset([-10, 0])
       .html((d) => {
-        return "<strong> " + d.title + " " + d.role + " </strong>" +
+        return "<strong> " + d.champName + " " + roleMap[d.role].name + " </strong>" +
           "<br>" +
-          "<strong>" + this.props.optionX.label + ":</strong> <span>" + d.general[this.props.optionX.value] + "</span> " +
+          "<strong>" + this.props.optionX.label + ":</strong> <span>" + d[this.props.optionX.value] + "</span> " +
           "<br>" +
-          "<strong>" + this.props.optionY.label + ":</strong> <span>" + d.general[this.props.optionY.value] + "</span> ";
+          "<strong>" + this.props.optionY.label + ":</strong> <span>" + d[this.props.optionY.value] + "</span> ";
       });
   }
 
   zoom() {
     return d3.zoom()
-      .extent([[this.props.padding, this.props.padding], [this.props.width - (this.props.padding * 2), this.props.height - this.props.padding]])
+      .extent([[this.props.padding, this.props.padding], [this.props.width - (this.props.padding * 1.5), this.props.height - this.props.padding]])
       .scaleExtent([1, 10])
-      .translateExtent([[this.props.padding, this.props.padding], [this.props.width - (this.props.padding * 2), this.props.height - this.props.padding]])
+      .translateExtent([[this.props.padding, this.props.padding], [this.props.width - (this.props.padding * 1.5), this.props.height - this.props.padding]])
       .on("zoom", this.zoomed);
   }
 

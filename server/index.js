@@ -10,9 +10,11 @@ const ngrok = (isDev && process.env.ENABLE_TUNNEL) || argv.tunnel ? require('ngr
 const resolve = require('path').resolve;
 const app = express();
 const cron = require('node-cron');
+const data = require('./getData');
 
+data.getData();
 cron.schedule('0 0 * * *', () => {
-  console.log('running a task every day at midnight');
+  data.getData();
 });
 
 // If you need a backend, e.g. an API, add your custom backend-specific middleware here

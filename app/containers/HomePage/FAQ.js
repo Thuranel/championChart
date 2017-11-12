@@ -20,7 +20,7 @@ class FAQ extends React.Component { // eslint-disable-line react/prefer-stateles
             <div style={{ width: "90%", textAlign: "left", margin: "auto" }}>
               It doesn't bring any new data, but it brings a new way to see it that brings interesting possibilities.
               For example, if you want to know which champion to ban,
-              simply compare the win rate and the play rate of all the champions see which high success champion is played often to make an optimal ban.
+              simply compare the win rate and the play rate of all the champions to see which high success champion is played often to make an optimal ban.
               You want to know which champion is the best early? Compare the win rate of champions at 20 minutes with the general win rate and see which champion get the biggest spike.
               The possibilities are endless!
             </div>
@@ -28,7 +28,7 @@ class FAQ extends React.Component { // eslint-disable-line react/prefer-stateles
           <div style={{ float: "left" }} className="faqParagraph">
             <h3> Where do you get your data? </h3>
             <div style={{ width: "90%", textAlign: "left", margin: "auto" }}>
-              The data is collected directly from <a href="http://champion.gg">Champion.gg</a>.
+              The data is collected directly from <a href="http://champion.gg">Champion.gg</a> API and from League of Legends API.
               The data is updated daily to offer you the most recent statistics.
             </div>
           </div>
