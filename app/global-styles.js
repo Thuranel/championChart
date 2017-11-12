@@ -28,10 +28,6 @@ injectGlobal`
     line-height: 1.5em;
   }
   
-  .grid line {
-    stroke-opacity: 0.2;
-  }
-  
   .d3-tip {
     line-height: 1;
     font-weight: bold;
@@ -61,4 +57,42 @@ injectGlobal`
     top: 100%;
     left: 0;
   }
+  
+  .grid line {
+    stroke-opacity: 0.2;
+  }
+  
+  select {
+    border: 1px solid;
+    text-align: center;
+    text-align-last: center;
+    border-radius: 5px;
+    outline: none;
+    height: 30px;
+  }
+  
+  .gold-text {
+    color: #D5AD6D; 
+    background: -webkit-linear-gradient(transparent, transparent), 
+                -webkit-linear-gradient(top, rgba(213,173,109,1) 0%, 
+                 rgba(213,173,109,1) 26%, rgba(226,186,120,1) 35%, 
+                 rgba(163,126,67,1) 45%, rgba(145,112,59,1) 61%, 
+                 rgba(213,173,109,1) 100%);
+    background: -o-linear-gradient(transparent, transparent); 
+                -webkit-background-clip: text; 
+                -webkit-text-fill-color: transparent;
+  }
+ 
+  #banner {
+    height: 60px;
+    float: left;
+    margin-top: 10px;
+  }
+  
+  #header {
+    padding: 0 16px;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #e0e0e0;
+  }
+ 
 `;

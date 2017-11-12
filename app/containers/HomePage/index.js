@@ -12,6 +12,7 @@ import * as d3 from 'd3';
 import d3Tip from 'd3-tip';
 import { champData } from './data';
 import RoleSelector from './RoleSelector';
+import FAQ from './FAQ';
 
 
 const color = d3.scaleOrdinal(d3.schemeCategory10);
@@ -35,7 +36,7 @@ export class HomePage extends React.PureComponent {
     this.state = {
       width: 900,
       height: 600,
-      padding: 30,
+      padding: 40,
       avatarSize: 0,
       categories,
       optionX: categories[0],
@@ -117,17 +118,20 @@ export class HomePage extends React.PureComponent {
       <article>
         {
           this.state.data !== [] &&
-            <div id="chart" style={{ maxWidth: 1130, paddingRight: 20, margin: "auto" }}>
-              <div style={{ float: 'left', maxWidth: 1020 }}>
-                <select value={this.state.optionY.value} onChange={(e) => this.updateY(e)} style={{ float: 'left', marginTop: this.state.padding }}>
-                  {options}
-                </select>
-                <ScatterPlot data={champData} {...this.state} />
-                <select value={this.state.optionX.value} onChange={(e) => this.updateX(e)} style={{ float: 'right' }}>
-                  {options}
-                </select>
+            <div>
+              <div id="chart" style={{ maxWidth: 1130, paddingRight: 20, margin: "auto" }}>
+                <div style={{ float: 'left', maxWidth: 1020 }}>
+                  <select className="styled-select blue semi-square" value={this.state.optionY.value} onChange={(e) => this.updateY(e)} style={{ float: 'left', marginTop: this.state.padding }}>
+                    {options}
+                  </select>
+                  <ScatterPlot data={champData} {...this.state} />
+                  <select className="styled-select blue semi-square" value={this.state.optionX.value} onChange={(e) => this.updateX(e)} style={{ float: 'right', marginRight: 23 }}>
+                    {options}
+                  </select>
+                </div>
+                <RoleSelector />
               </div>
-              <RoleSelector />
+              <FAQ />
             </div>
         }
       </article>
@@ -407,7 +411,7 @@ class ScatterPlot extends React.Component {
           <XAxis scale={this.state.xScale} id="xaxis" {...this.props} />
           <YAxis scale={this.state.yScale} id="yaxis" {...this.props} />
         </g>
-        <rect fill="none" pointerEvents={"all"} x={this.props.padding} y={this.props.padding} width={clipWidth} height={clipHeight}> </rect>
+        <rect fill="none" cursor="move" pointerEvents={"all"} x={this.props.padding} y={this.props.padding} width={clipWidth} height={clipHeight}> </rect>
         <defs>
           <clipPath id="clip">
             <rect id="clip-rect" x={this.props.padding} y={this.props.padding} width={clipWidth} height={clipHeight}>

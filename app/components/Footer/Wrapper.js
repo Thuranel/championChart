@@ -5,6 +5,7 @@ const Wrapper = styled.footer`
   justify-content: space-between;
   padding: 1em 0;
   border-top: 1px solid #666;
+  margin-top: 20px;
 `;
 
 export default Wrapper;
