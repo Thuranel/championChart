@@ -17,7 +17,7 @@ exports.getData = function getData() {
   function getChampData(champIdMap) {
     api().get('http://api.champion.gg/v2/champions', {
       params: {
-        api_key: 'champion.gg api key',
+        api_key: process.env.CHAMPIONGG_API_KEY,
         limit: 210,
         champData: 'winsByMatchLength,damage'
       }
@@ -42,14 +42,15 @@ exports.getData = function getData() {
           response.data[i].winRateAt40plus = parseFloat(Math.round(response.data[i].winsByMatchLength.fortyPlus.winRate * 100 * 100) / 100).toFixed(2);
         }
 
-        jsonfile.writeFile('./data.json', response.data, (err) => {
+        console.log('writing new data to data.json');
+        jsonfile.writeFile('./app/containers/HomePage/data.json', response.data, (err) => {
           if (err) {
             console.log('error writing to file');
           }
         });
       })
       .catch((error) => {
-        console.log('There has been an error getting champ data: ');
+        console.log('There has been an error getting champ data from champion.gg api: ');
         console.log(error);
 
         jsonfile.writeFile('./error.json', error, (err) => {
@@ -62,7 +63,7 @@ exports.getData = function getData() {
 
   api().get('https://eun1.api.riotgames.com/lol/static-data/v3/champions', {
     params: {
-      api_key: 'league api key'
+      api_key: process.env.LEAGUE_API_KEY
     }
   })
     .then((response) => {
@@ -80,6 +81,8 @@ exports.getData = function getData() {
       getChampData(champIdMap);
     })
     .catch((error) => {
+      console.log('error getting champ data from league api: ');
+      console.log(error);
       jsonfile.writeFile('./error.json', error, (err) => {
         if (err) {
           console.log('error writing to file');
