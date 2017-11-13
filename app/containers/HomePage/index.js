@@ -142,7 +142,7 @@ export class HomePage extends React.PureComponent {
                     {options}
                   </select>
                 </div>
-                <RoleSelector />
+                <RoleSelector color={color} />
               </div>
               <FAQ />
             </div>

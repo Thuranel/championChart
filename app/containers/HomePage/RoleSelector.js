@@ -1,6 +1,5 @@
 import React from 'react';
 import * as d3 from 'd3';
-const color = d3.scaleOrdinal(d3.schemeCategory10);
 
 
 class RoleSelector extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -26,7 +25,7 @@ class RoleSelector extends React.Component { // eslint-disable-line react/prefer
   componentDidMount() {
     d3.selectAll(".roleBox")
       .style("color", ((d, i) => {
-        return color(i);
+        return this.props.color(i);
       }));
   }
 
