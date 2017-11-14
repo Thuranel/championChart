@@ -50,7 +50,7 @@ export class HomePage extends React.PureComponent {
       width: 900,
       height: 600,
       padding: 40,
-      avatarSize: 0,
+      avatarSize: { size: 0, stroke: 0 },
       categories,
       optionX: categories[0],
       optionY: categories[1]
@@ -84,15 +84,15 @@ export class HomePage extends React.PureComponent {
   }
 
   updateDimensions() {
-    let avatarSize = 0;
+    let avatarSize = { size: 0, stroke: 0 };
     if ($(window).width() > 768) {
-      avatarSize = 50;
+      avatarSize = { size: 50, stroke: 2.5 };
     }
     else if ($(window).width() <= 768 && $(window).width() > 500) {
-      avatarSize = 40;
+      avatarSize = { size: 40, stroke: 2 };
     }
     else {
-      avatarSize = 25;
+      avatarSize = { size: 25, stroke: 1 };
     }
 
     // resize the chart depending on available space
@@ -257,10 +257,10 @@ class DataCircles extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.avatarSize !== this.props.avatarSize) {
       d3.selectAll('circle')
-        .attr('r', nextProps.avatarSize / 2);
+        .attr('r', nextProps.avatarSize.size / 2)
+        .style('stroke-width', nextProps.avatarSize.stroke);
     }
-
-    else if (nextProps.xScale !== this.props.xScale || nextProps.yScale !== this.props.yScale) {
+    if (nextProps.xScale !== this.props.xScale || nextProps.yScale !== this.props.yScale) {
       d3.selectAll('circle')
         .attr('cx', ((d) => {
           return nextProps.xScale(parseFloat(d[nextProps.optionX.value]));
@@ -284,7 +284,7 @@ class DataCircles extends React.Component {
       .attr('cy', ((d) => {
         return this.props.yScale(parseFloat(d[this.props.optionY.value]));
       }))
-      .attr('r', this.props.avatarSize / 2)
+      .attr('r', this.props.avatarSize.size / 2)
       .style('stroke', ((d) => {
         return color(roleMap[d.role].index);
       }))
@@ -338,8 +338,8 @@ class ScatterPlot extends React.Component {
     // update only if avatar_size changes
     if (nextProps.avatarSize !== this.props.avatarSize) {
       d3.selectAll('pattern image')
-        .attr('height', nextProps.avatarSize)
-        .attr('width', nextProps.avatarSize);
+        .attr('height', nextProps.avatarSize.size)
+        .attr('width', nextProps.avatarSize.size);
     }
 
     if (nextProps.optionX !== this.props.optionX || nextProps.optionY !== this.props.optionY) {
@@ -389,8 +389,8 @@ class ScatterPlot extends React.Component {
       champPattern.append("image")
         .attr("x", 0)
         .attr("y", 0)
-        .attr("height", this.props.avatarSize)
-        .attr("width", this.props.avatarSize)
+        .attr("height", this.props.avatarSize.size)
+        .attr("width", this.props.avatarSize.size)
         .attr("xlink:href", images[d.key + ".png"]);
     });
   }
