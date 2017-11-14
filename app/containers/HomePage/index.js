@@ -250,8 +250,25 @@ class XAxis extends React.Component {
 
 class DataCircles extends React.Component {
 
-  componentDidUpdate() {
+  componentDidMount() {
     this.renderCircle();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.avatarSize !== this.props.avatarSize) {
+      d3.selectAll('circle')
+        .attr('r', nextProps.avatarSize / 2);
+    }
+
+    else if (nextProps.xScale !== this.props.xScale || nextProps.yScale !== this.props.yScale) {
+      d3.selectAll('circle')
+        .attr('cx', ((d) => {
+          return nextProps.xScale(parseFloat(d[nextProps.optionX.value]));
+        }))
+        .attr('cy', ((d) => {
+          return nextProps.yScale(parseFloat(d[nextProps.optionY.value]));
+        }));
+    }
   }
 
   renderCircle() {
