@@ -35,7 +35,7 @@ class FAQ extends React.Component { // eslint-disable-line react/prefer-stateles
           <div style={{ float: "right" }} className="faqParagraph">
             <h3> What programming language did you use? </h3>
             <div style={{ width: "90%", textAlign: "left", margin: "auto" }}>
-              Champion Charts is made with React.
+              Champion Charts is made with React and D3.
               If you want to contribute or see the code that was used to make the website simply visit the &nbsp;
               <a href="https://github.com/Thuranel/championChart">Github's project</a>
             </div>
