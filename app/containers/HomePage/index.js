@@ -13,7 +13,7 @@ import d3Tip from 'd3-tip';
 import RoleSelector from './RoleSelector';
 import FAQ from './FAQ';
 
-const champData = require('./data.json');
+const champData = require('../../assets/data.json');
 const color = d3.scaleOrdinal(d3.schemeCategory10);
 
 function importAll(r) {

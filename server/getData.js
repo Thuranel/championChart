@@ -43,7 +43,7 @@ exports.getData = function getData() {
         }
 
         console.log('writing new data to data.json');
-        jsonfile.writeFile('./app/containers/HomePage/data.json', response.data, (err) => {
+        jsonfile.writeFile('./app/assets/data.json', response.data, (err) => {
           if (err) {
             console.log('error writing to file');
           }

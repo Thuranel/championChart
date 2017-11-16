@@ -85,7 +85,8 @@ module.exports = (options) => ({
     }),
     new webpack.NamedModulesPlugin(),
     new CopyWebpackPlugin([
-      { from: './app/assets/riot.txt' }
+      { from: './app/assets/riot.txt' },
+      { from: './app/assets/data.json' }
     ])
   ]),
   resolve: {
