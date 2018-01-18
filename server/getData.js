@@ -15,7 +15,7 @@ exports.getData = function getData() {
   }
 
   function getChampData(champIdMap) {
-    api().get('http://api.champion.gg/v2/champions', {
+    return api().get('http://api.champion.gg/v2/champions', {
       params: {
         api_key: process.env.CHAMPIONGG_API_KEY,
         limit: 210,
@@ -61,7 +61,7 @@ exports.getData = function getData() {
       });
   }
 
-  api().get('https://eun1.api.riotgames.com/lol/static-data/v3/champions', {
+  return api().get('https://na1.api.riotgames.com/lol/static-data/v3/champions', {
     params: {
       api_key: process.env.LEAGUE_API_KEY
     }

@@ -13,9 +13,6 @@ const cron = require('node-cron');
 const data = require('./getData');
 
 data.getData();
-cron.schedule('0 0 * * *', () => {
-  data.getData();
-});
 
 // If you need a backend, e.g. an API, add your custom backend-specific middleware here
 // app.use('/api', myApi);
@@ -33,22 +30,34 @@ const prettyHost = customHost || 'localhost';
 
 const port = argv.port || process.env.PORT || 5000;
 
+function startServer() {
+  return app.listen(port, host, (err) => {
+    if (err) {
+      return logger.error(err.message);
+    }
+
+    // Connect to ngrok in dev mode
+    if (ngrok) {
+      ngrok.connect(port, (innerErr, url) => {
+        if (innerErr) {
+          return logger.error(innerErr);
+        }
+
+        logger.appStarted(port, prettyHost, url);
+      });
+    } else {
+      logger.appStarted(port, prettyHost);
+    }
+  });
+}
+
 // Start your app.
-app.listen(port, host, (err) => {
-  if (err) {
-    return logger.error(err.message);
-  }
+let server = startServer();
 
-  // Connect to ngrok in dev mode
-  if (ngrok) {
-    ngrok.connect(port, (innerErr, url) => {
-      if (innerErr) {
-        return logger.error(innerErr);
-      }
-
-      logger.appStarted(port, prettyHost, url);
+cron.schedule('0 0 * * *', () => {
+  data.getData()
+    .then(() => {
+      server.close();
+      server = startServer();
     });
-  } else {
-    logger.appStarted(port, prettyHost);
-  }
 });
